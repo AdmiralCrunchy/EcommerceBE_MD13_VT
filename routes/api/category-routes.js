@@ -46,7 +46,7 @@ router.put('/:id', (req, res) => {
       res.status(404).json({message: 'No catagory with this Id and no changes!'});
       return;
     }
-    res.json(category)
+    res.json(categoryData)
   }).catch (err => {
     res.status(500).json({msg: "I'm losing my mind with this stupid assignment", err});
   })
@@ -61,11 +61,11 @@ router.delete('/:id', async (req, res) => {
         res.status(404).json({ message: "There isn't a category at that Id!"})
         return;
       }
-      res.status(200).json(categoryData);
+      res.json(200).json(categoryData)
     }).catch (err => {
     res.status(500).json({msg: "Really hope that this is working",err});
   })
-  res.json(200).json({msg:"Category was destroyed!"})
+  
 });
 
 module.exports = router;
