@@ -5,8 +5,8 @@ const { Tag, Product, ProductTag } = require('../../models');
 
 router.get('/', (req, res) => {
   Tag.findAll({include: [{model: Product}]
-  }).then(data =>{
-    res.json(data)
+  }).then(tagData =>{
+    res.json(tagData)
   }).catch(err =>{
     res.status(500).json({msg: "Not good, not good at all", err})
   });
@@ -15,45 +15,39 @@ router.get('/', (req, res) => {
   // be sure to include its associated Product data
 });
 
-router.get('/:id', (req, res) => {
-  Tag.findByPk(reg.params.id, {
-    include: [{
-      model: Product
-    }]
-  }).then(data => {
-    res.json(data)
-  }).catch(err=> {
-    res.status(500).json({msg: "Not a single id by that name", err})
-  })
-  
-  // find a single tag by its `id`
-  // be sure to include its associated Product data
+router.get('/:id', async (req, res) => {
+  try { 
+    const tagData = Tag.findByPk(reg.params.id, {
+      include: [{model: Product}]
+    });
+  if(!tagData) {
+    res.status(404).json({msg: "Not a single id by that name", err});
+    return
+  }
+  res.status(200).json(tagData);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-router.post('/', (req, res) => {
-  Tag.create({
-    tag_name: req.body.tag_name
-  }).then(data => {
-    res.json(data)
-  }).catch(err=>{
+router.post('/', async (req, res) => {
+  try{
+    const tagData = await Tag.create({tag_name: req.body.tag_name});
+    res.status(200).json(tagData)
+  }catch(err){
     res.status(500).json({ msg: "bad thing happened!", err})
-  })
-  // create a new tag
-
+  }
 });
 
 router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
-  Tag.update({
-    tag_name: req.body.tag_name
-  },
-  {
-    where: { id: req.params.id}
-  }).then (tag=> {
-    if(!tag[0]){
+  Tag.update({tag_name: req.body.tag_name},
+  {where: { id: req.params.id}
+  }).then (tagData=> {
+    if(!tagData[0]){
       return res.status(404).json({msg: "sorry no tag"})
     }
-    res.json(tag)
+    res.json(tagData)
   }).catch(err=> {
     res.status(500).json({msg: "Bad news for you", err})
   })
@@ -61,10 +55,7 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete on tag by its `id` value
-  Tag.destroy({
-    where: {
-      id:req.params.id
-    }
+  Tag.destroy({where: {id:req.params.id}
   }).then(data=>{
     res.json(data)
   }).catch(err=>{
